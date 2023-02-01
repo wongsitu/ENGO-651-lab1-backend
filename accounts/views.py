@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User
+from django.forms.models import model_to_dict
+from django.contrib.auth.forms import AuthenticationForm
 from rest_framework.views import APIView
 from rest_framework import permissions
 from django.contrib import auth
@@ -15,7 +17,7 @@ class GetCSRFToken(APIView):
     def get(self, request, format=None):
         return Response({ 'success': True, 'data': 'CSRF cookie set' })
 
-class CheckAuthenticatedView(APIView):
+class CurrentUserView(APIView):
     def get(self, request, format=None):
         user = self.request.user
 
@@ -23,7 +25,7 @@ class CheckAuthenticatedView(APIView):
             isAuthenticated = user.is_authenticated
 
             if isAuthenticated:
-                return Response({ 'success': isAuthenticated, 'data': 'success' })
+                return Response({ 'success': isAuthenticated, 'data': model_to_dict(user) })
             else:
                 return Response({ 'success': isAuthenticated })
         except:
@@ -52,23 +54,14 @@ class LoginView(APIView):
     permission_classes = (permissions.AllowAny, )
 
     def post(self, request, format=None):
-        data = self.request.data
-        username = data['username']
-        password = data['password']
+        auth_form = AuthenticationForm(request, data=request.POST)
 
-        try:
-            user = auth.authenticate(username=username, password=password)
-
-            if user:
-                if user.is_active:
-                    auth.login(request, user)
-                    return Response({ 'success': True })
-                else:
-                    return Response({ 'success': False, 'errors': ["Your account was inactive."] })
-            else:
-                return Response({ 'success': False, 'errors': ["Invalid login details given"] })
-        except:
-            return Response({ 'success': False, 'errors': ['Something went wrong when logging in'] })
+        if auth_form.is_valid():
+            user = auth_form.get_user()
+            auth.login(request, user)
+            return Response({ 'success': True, 'data': model_to_dict(user) })
+        else:
+            return Response({ 'success': False, 'errors': auth_form.errors })
 
 class LogoutView(APIView):
     def post(self, request, format=None):
