@@ -10,20 +10,6 @@ from .serializers import UserSerializer
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.utils.decorators import method_decorator
 
-class CurrentUserView(APIView):
-    def get(self, request, format=None):
-        user = self.request.user
-
-        try:
-            isAuthenticated = user.is_authenticated
-
-            if isAuthenticated:
-                return Response({ 'success': isAuthenticated, 'data': model_to_dict(user) })
-            else:
-                return Response({ 'success': isAuthenticated })
-        except:
-            return Response({ 'success': isAuthenticated, 'errors': ['Something went wrong when checking authentication status'] })
-
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class GetCSRFToken(APIView):
     permission_classes = (permissions.AllowAny, )
@@ -70,3 +56,20 @@ class LogoutView(APIView):
             return Response({ 'success': True })
         except:
             return Response({ 'success': True, 'errors': ['Something went wrong when logging out'] })
+
+class CurrentUserView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request, format=None):
+        user = self.request.user
+
+        try:
+            isAuthenticated = user.is_authenticated
+
+            if isAuthenticated:
+                return Response({ 'success': True, 'data': model_to_dict(user) })
+            else:
+                return Response({ 'success': True, 'data': None })
+        except:
+            return Response({ 'success': False, 'errors': ['Something went wrong when checking authentication status'] })
