@@ -54,7 +54,7 @@ class LoginView(APIView):
     permission_classes = (permissions.AllowAny, )
 
     def post(self, request, format=None):
-        auth_form = AuthenticationForm(request, data=request.POST)
+        auth_form = AuthenticationForm(request, data=request.data)
 
         if auth_form.is_valid():
             user = auth_form.get_user()
