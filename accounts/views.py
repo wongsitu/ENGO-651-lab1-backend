@@ -10,13 +10,6 @@ from .serializers import UserSerializer
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.utils.decorators import method_decorator
 
-@method_decorator(ensure_csrf_cookie, name='dispatch')
-class GetCSRFToken(APIView):
-    permission_classes = (permissions.AllowAny, )
-
-    def get(self, request, format=None):
-        return Response({ 'success': True, 'data': 'CSRF cookie set' })
-
 class CurrentUserView(APIView):
     def get(self, request, format=None):
         user = self.request.user
@@ -31,21 +24,28 @@ class CurrentUserView(APIView):
         except:
             return Response({ 'success': isAuthenticated, 'errors': ['Something went wrong when checking authentication status'] })
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class GetCSRFToken(APIView):
+    permission_classes = (permissions.AllowAny, )
+
+    def get(self, request, format=None):
+        return Response({ 'success': True, 'data': 'CSRF cookie set' })
+
 @method_decorator(csrf_protect, name='dispatch')
 class RegisterView(APIView):
     permission_classes = (permissions.AllowAny, )
 
     def post(self, request, format=None):
         registered = False
-        user_form = UserForm(data=request.POST)
-        serializer = UserSerializer(data=request.data)
+        user_form = UserForm(data=request.data)
 
         if user_form.is_valid():
             user = user_form.save()
             user.set_password(user.password)
             user.save()
             registered = True
-            return Response({ 'success': registered, 'data': serializer.initial_data })
+            auth.login(request, user)
+            return Response({ 'success': registered, 'data': model_to_dict(user) })
         else:
             return Response({ 'success': False, 'errors': user_form.errors })
 
@@ -64,7 +64,7 @@ class LoginView(APIView):
             return Response({ 'success': False, 'errors': auth_form.errors })
 
 class LogoutView(APIView):
-    def post(self, request, format=None):
+    def delete(self, request, format=None):
         try:
             auth.logout(request)
             return Response({ 'success': True })

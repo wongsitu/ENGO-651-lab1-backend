@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'library.urls'
@@ -93,8 +94,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'library.wsgi.application'
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
+    'http://localhost:3000'
 ]
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
+
+CORS_ALLOW_CREDENTIALS=True
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
