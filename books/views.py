@@ -1,8 +1,8 @@
-from .models import Book
+from books.models import Book
 from rest_framework import viewsets, filters
-from .serializers import BookSerializer
+from books.serializers import BookSerializer
 from django_filters.rest_framework import DjangoFilterBackend
-from .filters import BookFilter
+from books.filters import BookFilter
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
