@@ -36,13 +36,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
-    'corsheaders',
     'psycopg2',
     'rest_framework',
     'books',
     'accounts',
     'django_extensions',
-    'rest_framework.authtoken',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -93,11 +92,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'library.wsgi.application'
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000'
-]
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://127.0.0.1:3000,http://localhost:3000").split(",")
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "http://127.0.0.1:3000,http://localhost:3000").split(",")
 
 CORS_ALLOW_CREDENTIALS=True
 

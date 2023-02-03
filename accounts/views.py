@@ -58,7 +58,6 @@ class LogoutView(APIView):
             return Response({ 'success': True, 'errors': ['Something went wrong when logging out'] })
 
 class CurrentUserView(APIView):
-    authentication_classes = []
     permission_classes = []
 
     def get(self, request, format=None):
