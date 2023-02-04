@@ -1,5 +1,4 @@
 from django_filters import rest_framework
-from .models import Book
 
 class BookFilter(rest_framework.FilterSet):
     id = rest_framework.CharFilter(field_name='id', lookup_expr='iexact')
