@@ -7,8 +7,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 router = routers.DefaultRouter()
-router.register(r'books', BooksView.Books)
-router.register(r'reviews', ReviewView.Reviews)
+router.register(r'books', BooksView.Books, basename='books')
+router.register(r'reviews', ReviewView.Reviews, basename='reviews')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
