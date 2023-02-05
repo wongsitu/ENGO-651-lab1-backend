@@ -9,14 +9,14 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name', 'email']
 
 class ReviewSerializer(serializers.ModelSerializer):
-  id = serializers.ReadOnlyField()
-  user = serializers.SerializerMethodField()
+    id = serializers.ReadOnlyField()
+    user = serializers.SerializerMethodField()
 
-  def get_user(self, review):
+    def get_user(self, review):
         user = User.objects.get(id=review.user.id)
         serializer = UserSerializer(instance=user)
         return serializer.data
 
-  class Meta:
-      model = Review
-      fields = ['id', 'user', 'title', 'description', 'created_at', 'updated_at', 'rating']
+    class Meta:
+        model = Review
+        fields = ['id', 'user', 'title', 'description', 'created_at', 'updated_at', 'rating']

@@ -21,6 +21,3 @@ class Review(models.Model):
 
     def __format__(self):
         return self.title
-
-    def pre_save(self, obj):
-        obj.user = self.request.user
