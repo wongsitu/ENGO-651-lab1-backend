@@ -13,20 +13,22 @@ class Books(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = BookSerializer
 
-    def get_queryset(self):
+    def get_queryset(self, search, *args, **kwargs):
         query = 'SELECT * from books_book'
+        if (search):
+            with connection.cursor() as cursor:
+                cursor.execute(f"""SELECT * FROM books_book 
+                                WHERE LOWER(title) LIKE %s 
+                                OR LOWER(isbn) LIKE %s 
+                                OR LOWER(author) LIKE %s""",
+                                ['%' + search + '%', '%' + search + '%', '%' + search + '%'])
+                response = cursor.fetchall()
+                return Book.objects.filter(pk__in=[book[0] for book in response])
         return Book.objects.raw(query)
 
-    def get_search_queryset(self, search, **kwargs):
-        search_key = search.lower()
-        query = f"""SELECT * FROM books_book WHERE LOWER(title) LIKE '{search_key}' OR LOWER(isbn) LIKE '{search_key}' OR LOWER(author) LIKE '{search_key}';"""
-        return Book.objects.raw(query)
-    
     def list(self, request, *args, **kwargs):
         search = request.GET.get('search')
-        queryset = self.filter_queryset(self.get_queryset())
-        if search:
-            queryset = self.filter_queryset(self.get_search_queryset(search))
+        queryset = self.filter_queryset(self.get_queryset(search=search))
 
         page = self.paginate_queryset(queryset)
         if page is not None:
