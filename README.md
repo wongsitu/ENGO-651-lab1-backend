@@ -1,6 +1,6 @@
 # ENGO-lab1
 
-## Notes
+## notes
 this is a two part solution, the frontend url is https://github.com/wongsitu/ENGO-651-lab1-frontend. clone both repos and follow their respective instructions
 
 ## How to run the project
@@ -27,9 +27,9 @@ Then in your terminal run
   pip install -r requirements.txt
 ```
 
-To start the DB: 
+To start the DB
 
-```terminal
+```
 sudo service postgresql start
 ```
 
@@ -58,4 +58,7 @@ Logout: Logged-in users should be able to log out of the site.
 
 ## Description
 
-For this project we are using Django an Django Rest Framework. For the SQL requirement part, I proposed 2 solutions. One with actual raw SQL wich is in the branch ```feature/raw-SQL-queries``` and the other one with ORM, which is in ```master``` branch.
+- For this project we are using Django an Django Rest Framework. For the SQL requirement part, I proposed 2 solutions. One with actual raw SQL wich is in the branch ```feature/raw-SQL-queries``` and the other one with ORM, which is in ```master``` branch.
+
+- For the user authentication, the frontend is keeping track of the user session via sessionid
+
