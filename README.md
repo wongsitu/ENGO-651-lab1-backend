@@ -1,6 +1,6 @@
 # ENGO-lab1
 
-## notes
+## Notes
 this is a two part solution, the frontend url is https://github.com/wongsitu/ENGO-651-lab1-frontend. clone both repos and follow their respective instructions
 
 ## How to run the project
