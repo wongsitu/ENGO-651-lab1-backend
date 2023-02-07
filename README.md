@@ -58,4 +58,7 @@ Logout: Logged-in users should be able to log out of the site.
 
 ## Description
 
-For this project we are using Django an Django Rest Framework. For the SQL requirement part, I proposed 2 solutions. One with actual raw SQL wich is in the branch ```feature/raw-SQL-queries``` and the other one with ORM, which is in ```master``` branch.
+- For this project we are using Django an Django Rest Framework. For the SQL requirement part, I proposed 2 solutions. One with actual raw SQL wich is in the branch ```feature/raw-SQL-queries``` and the other one with ORM, which is in ```master``` branch.
+
+- For the user authentication, the frontend is keeping track of the user session via sessionid
+
