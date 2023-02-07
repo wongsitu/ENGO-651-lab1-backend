@@ -18,19 +18,19 @@ class Reviews(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filter_class = ReviewFilter
 
-    # def create(self, request):
-    #     review_form = ReviewForm(data=request.data)
+    def create(self, request):
+        review_form = ReviewForm(data=request.data)
 
-    #     if review_form.is_valid():
-    #         review = review_form.save(commit=False)
-    #         book_id = request.data.get('book')
-    #         book = Book.objects.get(id=book_id)
-    #         review.user = request.user
-    #         review.book = book
-    #         review.save()
-    #         return Response({ 'success': True, 'data': model_to_dict(review)  })
-    #     else:
-    #         return Response({ 'success': False, 'errors': review_form.errors })
+        if review_form.is_valid():
+            review = review_form.save(commit=False)
+            book_id = request.data.get('book')
+            book = Book.objects.get(id=book_id)
+            review.user = request.user
+            review.book = book
+            review.save()
+            return Response({ 'success': True, 'data': model_to_dict(review)  })
+        else:
+            return Response({ 'success': False, 'errors': review_form.errors })
 
     # def get_queryset(self):
     #     query = 'SELECT * from reviews_review'
