@@ -27,6 +27,12 @@ Then in your terminal run
   pip install -r requirements.txt
 ```
 
+To start the DB: 
+
+```terminal
+sudo service postgresql start
+```
+
 Then run migrations
 
 ```
