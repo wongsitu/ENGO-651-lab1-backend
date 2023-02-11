@@ -7,6 +7,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db import connection
+import requests
 
 class Books(viewsets.ReadOnlyModelViewSet):
     authentication_classes = [SessionAuthentication]
@@ -40,7 +41,20 @@ class Books(viewsets.ReadOnlyModelViewSet):
 
     def retrieve(self, request, pk=None):
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM books_book WHERE id = %s", [pk])
+            cursor.execute("SELECT * FROM books_book WHERE isbn = %s", [pk])
             (id, isbn, title, author, year) = cursor.fetchone()
 
-            return Response({ 'id': id, 'isbn': isbn, 'title': title, 'author': author, 'year': year })
+            res = requests.get("https://www.googleapis.com/books/v1/volumes", params={"q": f"isbn:{pk}"})
+            data = res.json()
+
+            if data.items:
+                return Response({
+                                'id': id,
+                                'isbn': isbn, 
+                                'title': title, 
+                                'author': author, 
+                                'year': year, 
+                                'averageRating': data['items'][0]['volumeInfo']['averageRating'],
+                                'ratingsCount': data['items'][0]['volumeInfo']['ratingsCount'],
+                                })
+            return Response({ 'id': id, 'isbn': isbn, 'title': title, 'author': author, 'year': year, 'averageRating': 0, 'ratingsCount': 0 })

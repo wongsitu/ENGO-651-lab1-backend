@@ -9,6 +9,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.forms.models import model_to_dict
+from django.db import connection
 
 class Reviews(viewsets.ModelViewSet):
     queryset = Review.objects.all()
@@ -23,33 +24,39 @@ class Reviews(viewsets.ModelViewSet):
 
         if review_form.is_valid():
             review = review_form.save(commit=False)
-            book_id = request.data.get('book')
-            book = Book.objects.get(id=book_id)
+            isbn = request.data.get('isbn')
+            book = Book.objects.get(isbn=isbn)
             review.user = request.user
             review.book = book
             review.save()
-            return Response({ 'success': True, 'data': model_to_dict(review)  })
+            return Response({ 'success': True, 'data': model_to_dict(review) })
         else:
             return Response({ 'success': False, 'errors': review_form.errors })
 
-    # def get_queryset(self):
-    #     query = 'SELECT * from reviews_review'
-    #     return Review.objects.raw(query)
+    def get_queryset(self, isbn, *args, **kwargs):
+        query = 'SELECT * from reviews_review'
+        if (isbn):
+            with connection.cursor() as cursor:
+                query = """
+                    SELECT *
+                    FROM reviews_review
+                    INNER JOIN books_book
+                    ON reviews_review.book_id = books_book.id
+                    WHERE books_book.isbn = %s
+                """
+                cursor.execute(query, [isbn])
+                response = cursor.fetchall()
+                return Review.objects.filter(pk__in=[review[0] for review in response])
+        return Review.objects.raw(query)
 
-    # def get_reviews_queryset(self, book_id, **kwargs):
-    #     query = f"""SELECT * FROM reviews_review WHERE id = {book_id};"""
-    #     return Review.objects.raw(query)
-    
-    # def list(self, request, *args, **kwargs):
-    #     book = request.GET.get('book')
-    #     queryset = self.filter_queryset(self.get_queryset())
-    #     if book:
-    #         queryset = self.filter_queryset(self.get_reviews_queryset(book))
+    def list(self, request, *args, **kwargs):
+        isbn = request.GET.get('isbn')
+        queryset = self.filter_queryset(self.get_queryset(isbn=isbn))
 
-    #     page = self.paginate_queryset(queryset)
-    #     if page is not None:
-    #         serializer = self.get_serializer(page, many=True)
-    #         return self.get_paginated_response(serializer.data)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     return Response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
