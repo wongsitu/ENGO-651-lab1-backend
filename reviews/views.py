@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.forms.models import model_to_dict
 from django.db import connection
+from rest_framework import status
 
 class Reviews(viewsets.ModelViewSet):
     queryset = Review.objects.all()
@@ -23,13 +24,50 @@ class Reviews(viewsets.ModelViewSet):
         review_form = ReviewForm(data=request.data)
 
         if review_form.is_valid():
-            review = review_form.save(commit=False)
-            isbn = request.data.get('isbn')
-            book = Book.objects.get(isbn=isbn)
-            review.user = request.user
-            review.book = book
-            review.save()
-            return Response({ 'success': True, 'data': model_to_dict(review) })
+            with connection.cursor() as cursor:
+                isbn = request.data.get('isbn')
+                user_id = request.user.id
+                query = """
+                    SELECT *
+                    FROM reviews_review
+                    INNER JOIN books_book
+                    ON reviews_review.book_id = books_book.id
+                    WHERE books_book.isbn = %s
+                    AND reviews_review.user_id = %s
+                """
+                cursor.execute(query, [isbn, user_id])
+                review = cursor.fetchone()
+
+                if review:
+                    return Response({ 'success': False, 'errors': ['You can only submit one review per book'] }, status=status.HTTP_208_ALREADY_REPORTED) 
+                else:
+                    title = review_form.data['title']
+                    description = review_form.data['description']
+                    rating = review_form.data['rating']
+                    cursor.execute("SELECT * FROM books_book WHERE isbn = %s", [isbn])
+                    book = cursor.fetchone()
+
+                    query = """
+                        INSERT INTO reviews_review 
+                        (user_id, title, description, rating, book_id, created_at, updated_at) 
+                        VALUES (%s, %s, %s, %s, %s, NOW(), NOW())
+                        RETURNING user_id, title, description, rating, book_id, updated_at;
+                    """
+
+                    cursor.execute(query, (user_id, title, description, rating, book[0]))
+                    (id, title, description, rating, book_id, created_at) = cursor.fetchone()
+
+                    return Response({ 
+                                    'success': True, 
+                                    'data': { 
+                                        'id': id, 
+                                        'title': title, 
+                                        'description': description, 
+                                        'rating': rating, 
+                                        'book_id': book_id, 
+                                        'created_at': created_at 
+                                        }
+                                    })
         else:
             return Response({ 'success': False, 'errors': review_form.errors })
 
