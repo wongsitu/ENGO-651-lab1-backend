@@ -15,7 +15,7 @@ class Books(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = BookSerializer
 
-    def get_queryset(self, search, *args, **kwargs):
+    def get_queryset(self, search=None, *args, **kwargs):
         query = 'SELECT * from books_book'
         if (search):
             with connection.cursor() as cursor:
